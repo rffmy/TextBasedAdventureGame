@@ -766,6 +766,15 @@ files:
 - name: story/story.json
   visible: true
   learner_created: true
+- name: game/saves/rv.json
+  visible: true
+  learner_created: true
+- name: game/saves/new_user.json
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/12295#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Mon, 12 Dec 2022 14:32:15 UTC
 record: 4
