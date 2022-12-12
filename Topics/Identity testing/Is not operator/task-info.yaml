@@ -1,0 +1,17 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: These variables refer to different objects.
+- text: These variables contain equal values.
+- text: These variables refer to one object.
+- text: These variables contain different values.
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/8080#comment
+status: Solved
+record: -1
