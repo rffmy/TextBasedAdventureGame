@@ -2,6 +2,7 @@ from random import choice
 from re import search
 from hstest import StageTest, CheckResult, WrongAnswer, dynamic_test, TestedProgram
 import json
+import os
 
 
 class TextBasedAdventureGameTest(StageTest):
@@ -17,6 +18,14 @@ class TextBasedAdventureGameTest(StageTest):
     diff_hard = "hard"
     lives = "5"
     picked_choice = ""
+
+    username2 = "CakeIsALie"
+    name2 = "jane"
+    gender2 = "female"
+    snack2 = "cake"
+    weapon2 = "spear"
+    tool2 = "jetpack"
+    picked_choice2 = ""
 
     @dynamic_test
     def test1(self):
@@ -70,7 +79,7 @@ class TextBasedAdventureGameTest(StageTest):
 
         if main.is_waiting_input():
             output = main.execute("2")
-            feedback = "Your program couldn't process input '2' to load a game! Make sure to say 'No save data found!'."
+            feedback = "Your program couldn't process input '2' to load a game! Make sure to say 'No save data found!' if there is no save file."
             return self.check_start_load(output, feedback)
         return CheckResult.wrong("Your program didn't ask for input!")
 
@@ -81,7 +90,7 @@ class TextBasedAdventureGameTest(StageTest):
 
         if main.is_waiting_input():
             output = main.execute("load")
-            feedback = "Your program couldn't process input 'load' to load a game! Make sure to say 'No save data found!'."
+            feedback = "Your program couldn't process input 'load' to load a game! Make sure to say 'No save data found!' if there is no save file."
             return self.check_start_load(output, feedback)
         return CheckResult.wrong("Your program didn't ask for input!")
 
@@ -419,7 +428,7 @@ class TextBasedAdventureGameTest(StageTest):
                 if search("({.*)|(\(.*\))", output.lower()):
                     return CheckResult.wrong(
                         "Words wrapped in brackets were found in your output: '{},()'. These words with brackets are not part of story! ")
-                if "level 2" in output.lower() and main.is_finished() and "goodbye" in output.lower():
+                if "level 2" in output.lower() and not main.is_finished():
                     return CheckResult.correct()
                 elif "game over" in output.lower() and "***welcome" in output.lower() and main.is_waiting_input():
                     main.execute("start")
@@ -432,11 +441,11 @@ class TextBasedAdventureGameTest(StageTest):
                     main.execute(self.tool)
                     main.execute(self.diff_easy)
 
-                if "level 2" in output.lower() and not main.is_finished() and "goodbye" in output.lower():
+                if "level 2" in output.lower() and main.is_finished() and "goodbye" in output.lower():
                     return CheckResult.wrong(
-                        "You should end the program directly after reaching level 2 for this stage!")
-                elif "level 2" in output.lower() and "goodbye" not in output.lower():
-                    return CheckResult.wrong("You should output 'Goodbye!' before ending the program!")
+                        "Your game should resume from Level 2 after reaching it!")
+                elif "level 2" in output.lower() and "goodbye" in output.lower():
+                    return CheckResult.wrong("You shouldn't output 'Goodbye!' after Level 2!")
 
                 if "game over" in output.lower() and main.is_finished():
                     return CheckResult.wrong(
@@ -445,7 +454,7 @@ class TextBasedAdventureGameTest(StageTest):
                     return CheckResult.wrong(
                         "You should print the welcome message with the menu again after game over!")
                 elif "game over" in output.lower() and not main.is_waiting_input():
-                    return CheckResult.wrong("Your program should wait for an input in the menu after game over!")
+                    return CheckResult.wrong("Your program wait for an input in the menu after game over!")
 
                 if "you died" in output.lower() and "level 1" not in output.lower() and "game over" not in output.lower():
                     return CheckResult.wrong(
@@ -586,6 +595,110 @@ class TextBasedAdventureGameTest(StageTest):
         main.start()
         return self.check_save()
 
+    @dynamic_test
+    def test21(self):
+
+        main = TestedProgram()
+        main.start()
+        if main.is_waiting_input():
+            output = main.execute("2")
+            if not main.is_waiting_input():
+                return CheckResult.wrong("You should ask for the user name!")
+            elif "type your user name" not in output.lower():
+                return CheckResult.wrong("You should output: 'Type your user name from the list:'")
+            elif self.username not in output.lower():
+                return CheckResult.wrong(
+                    f"You should output the list of users who have a save file! Your output doesn't contain this user: '{self.username}' !")
+            output = main.execute("neu_use")
+            if "no save data found" not in output.lower():
+                return CheckResult.wrong(
+                    "You should handle typos from user, output: 'No save data found!' and go back to menu.")
+            elif "***welcome" not in output.lower():
+                return CheckResult.wrong("You should go back to menu after a typo made by the user!")
+            main.execute("2")
+            output = main.execute(self.username)
+
+            if "what will you do? type the number of the option or type '/h' to show help" not in output.lower():
+                return CheckResult.wrong(
+                    "You should show the actions with this message: 'What will you do? Type the number of the option or type '/h' to show help.' ")
+            elif "1-" not in output or "2-" not in output or "3-" not in output:
+                return CheckResult.wrong("You should number the options: '1-', so that the player can easily type it!")
+
+            while True:
+                choices = ["1", "2", "3"]
+                random_choice = choice(choices)
+                if search("({.*)|(\(.*\))", output.lower()):
+                    return CheckResult.wrong(
+                        "Words wrapped in brackets were found in your output: '{},()'. These words with brackets are not part of story! ")
+                if "congratulations! you beat the game" in output.lower() and main.is_finished() and "goodbye" in output.lower():
+                    return CheckResult.correct()
+
+                if "congratulations! you beat the game" in output.lower() and not main.is_finished() and "goodbye" in output.lower():
+                    return CheckResult.wrong(
+                        "You should end the program directly after the player wins the game!")
+                elif "congratulations! you beat the game" in output.lower() and "goodbye" not in output.lower():
+                    return CheckResult.wrong("You should output 'Goodbye!' before ending the program!")
+
+                if "game over" in output.lower() and "***welcome" in output.lower() and not main.is_finished():
+                    return CheckResult.correct()
+
+                elif "game over" in output.lower() and main.is_finished():
+                    return CheckResult.wrong(
+                        "Your program should not end after game over! It should return back to menu.")
+                elif "game over" in output.lower() and "***welcome" not in output.lower():
+                    return CheckResult.wrong(
+                        "You should print the welcome message with the menu again after game over!")
+                elif "game over" in output.lower() and not main.is_waiting_input():
+                    return CheckResult.wrong("Your program should wait for an input in the menu after game over!")
+
+                if "you died" in output.lower() and "level 2" not in output.lower() and "game over" not in output.lower():
+                    return CheckResult.wrong(
+                        "Your program didn't start from the beginning of the level. Make sure you output the number of the level: 'Level 2' ")
+
+                if "what will you do? type the number of the option or type '/h' to show help" not in output.lower():
+                    choices.pop(choices.index(self.picked_choice))
+                    self.picked_choice = choice(choices)
+                    output = main.execute(self.picked_choice)
+
+                else:
+                    self.picked_choice = random_choice
+                    output = main.execute(self.picked_choice)
+
+        return CheckResult.wrong("Your program didn't ask for input!")
+
+    @dynamic_test
+    def test22(self):
+        save_dict = {
+            "char_attrs": {"name": self.name2.title(), "species": self.species.title(), "gender": self.gender2.title()},
+            "inventory": {"snack": self.snack2.title(), "weapon": self.weapon2.title(), "tool": self.tool2.title()},
+            "difficulty": self.diff_easy.title(),
+            "lives": int(self.lives),
+            "level": 2
+        }
+        if not os.path.exists(f"./game/saves/{self.username}.json"):
+            raise WrongAnswer("Make sure your program saves save files with the following path:\n"
+                              "\'game\\saves\\N.json\',\n"
+                              "where N is the username.")
+        with open(f"./game/saves/{self.username2}.json", "w") as f_json:
+            json.dump(save_dict, f_json)
+
+        main = TestedProgram()
+        main.start()
+        output = main.execute("2")
+        if main.is_waiting_input():
+            if "type your user name" in output.lower() and self.username not in output.lower():
+                return CheckResult.wrong(
+                    f"You should output the list of users who have a save file! Your output doesn't contain this user: '{self.username}' !")
+            elif "type your user name" in output.lower() and self.username2.lower() not in output.lower():
+                return CheckResult.wrong(
+                    f"You should output the list of users who have a save file! Your output doesn't contain this user: '{self.username2}'!")
+            output = main.execute(self.username2)
+            if "level 2" not in output.lower() or "what will you do? type the number of the option or type '/h' to show help" not in output.lower():
+                return CheckResult.wrong(
+                    f"The player, '{self.username2}' should be able to resume the game from Level 2!")
+            return CheckResult.correct()
+        return CheckResult.wrong("You should ask for the user name!")
+
     def check_welcome(self, output, feedback=""):
         if "welcome to" in output.lower() and "***" in output:
             return CheckResult.correct()
@@ -598,7 +711,7 @@ class TextBasedAdventureGameTest(StageTest):
         return CheckResult.wrong(feedback)
 
     def check_start_load(self, output, feedback):
-        if "no save data found" in output.lower():
+        if "type your user name" in output.lower() or "no save data found" in output.lower():
             return CheckResult.correct()
         return CheckResult.wrong(feedback)
 
@@ -675,13 +788,9 @@ class TextBasedAdventureGameTest(StageTest):
                 return CheckResult.wrong(
                     f"Save file doesn't exist. "
                     f"Should be located at \"saves{os.sep}{self.username}.json\"")
-            try:
-                with open(path) as f_json:
-                    try:
-                        save_file = json.load(f_json)
-                    except json.decoder.JSONDecodeError:
-                        raise WrongAnswer("A JSONDecodeError occurred while tests were reading your save file.\n"
-                                          "Make sure you save JSON file correctly. ")
+
+            with open(path) as f_json:
+                save_file = json.load(f_json)
 
                 if "char_attrs" not in save_file:
                     return CheckResult.wrong(
@@ -743,8 +852,6 @@ class TextBasedAdventureGameTest(StageTest):
                     return CheckResult.wrong("Save file doesn't contain the correct level count: 2")
                 else:
                     return CheckResult.correct()
-            except IsADirectoryError:
-                raise WrongAnswer("Make sure the saves are saved to a file with a path \'saves\\new_user.json\'")
 
         except (TypeError, IndexError, FileNotFoundError):
             return CheckResult.wrong("Save file doesn't exist with the given player name.")

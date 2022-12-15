@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/489000/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: Tue, 04 Oct 2022 12:51:47 UTC
+update_date: Thu, 15 Dec 2022 12:52:35 UTC
 stages:
 - id: 834
   step: 12292
@@ -16,7 +16,7 @@ stages:
   is_completed: true
 - id: 837
   step: 12295
-  is_completed: false
+  is_completed: true
 - id: 838
   step: 12296
   is_completed: false
@@ -94,6 +94,8 @@ topics:
     theory_id: 13017
   - title: Computer programming
     theory_id: 8739
+  - title: Paradigms
+    theory_id: 15860
   - title: Introduction to OOP
     theory_id: 3614
   - title: Load module
@@ -118,12 +120,12 @@ topics:
     theory_id: 11119
   - title: JSON
     theory_id: 6854
+  - title: Introduction to Linux
+    theory_id: 9526
   - title: Regexps basics
     theory_id: 7580
   - title: Regexps in Python
     theory_id: 9468
-  - title: Introduction to Linux
-    theory_id: 9526
   - title: File modes and permissions
     theory_id: 13953
   - title: Working with file modes and permissions

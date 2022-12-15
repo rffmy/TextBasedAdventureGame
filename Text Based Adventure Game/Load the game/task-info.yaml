@@ -8,6 +8,26 @@ files:
 - name: tests.py
   visible: false
   text: |
+    from test.tests import TextBasedAdventureGameTest
+
+    if __name__ == '__main__':
+        TextBasedAdventureGameTest('game.game').run_tests()
+  learner_created: false
+- name: game/saves/new_user.json
+  visible: true
+  learner_created: true
+- name: game/saves/rv.json
+  visible: true
+  learner_created: true
+- name: story/story.json
+  visible: true
+  learner_created: true
+- name: test/__init__.py
+  visible: false
+  learner_created: false
+- name: test/tests.py
+  visible: false
+  text: |
     from random import choice
     from re import search
     from hstest import StageTest, CheckResult, WrongAnswer, dynamic_test, TestedProgram
@@ -853,7 +873,7 @@ files:
                     elif save_file["inventory"]["tool"].lower() != self.tool:
                         return CheckResult.wrong(
                             "Save file doesn't contain the correct tool in the inventory: " + self.tool.title())
-                    elif save_file["difficulty"].lower() != self.diff_easy:
+                    elif str(save_file["difficulty"]).lower() != self.diff_easy:
                         return CheckResult.wrong(
                             "Save file doesn't contain the correct difficulty: " + self.diff_easy.title())
                     elif save_file["lives"] is None:
