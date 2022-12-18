@@ -9,7 +9,7 @@
         "weapon": "Sword",
         "tool": "Rope"
     },
-    "lives": 5,
+    "lives": 4,
     "difficulty": "Easy",
     "level": 2
 }

@@ -27,23 +27,6 @@ def process_top_menu_input(top_menu_input):
         return -1
 
 
-def create_character():
-    print("Create your character:")
-
-    char = {"name": input("1- Name \n").capitalize(), "species": input("2- Species \n").capitalize(),
-            "gender": input("3- Gender \n").capitalize()}
-
-    print("Pack your bag for the journey:")
-
-    inv = [None] * 3
-
-    inv[0] = char["snack"] = input("1- Favourite Snack \n").capitalize()
-    inv[1] = char["weapon"] = input("2- A weapon for the journey \n").capitalize()
-    inv[2] = char["tool"] = input("3- A traversal tool \n").capitalize()
-
-    return char, inv
-
-
 def set_difficulty():
     print("Choose your difficulty:\n1- Easy\n2- Medium\n3- Hard\n")
 
@@ -116,8 +99,11 @@ def add_to_inventory(inv, item):
 
 
 def remove_from_inventory(inv, item):
-    inv.remove(item)
-    print("An item has been removed from your inventory: " + item + "\n")
+    if item in inv:
+        inv.remove(item)
+        print("An item has been removed from your inventory: " + item + "\n")
+    else:
+        print(item + " not in inventory!\n")
     return inv
 
 
@@ -139,9 +125,14 @@ def process_user_input(user_input, char, inv, story, level, scene):
             outcome = story['outcomes'][f'lvl{level}'][f'scene{scene}'][f'outcome{user_input}']
 
             if type(outcome) is dict:
-                if scene == 2:
+                if level == 1 and scene == 2:
                     if "Key" in inv:
                         outcome = outcome['option1']
+                    else:
+                        outcome = outcome['option2']
+                if level == 2 and scene == 2:
+                    if 'Knife' in inv or 'Sword' in inv:
+                        outcome = outcome['option1']  # Win!
                     else:
                         outcome = outcome['option2']
 
@@ -170,7 +161,7 @@ def start_new_game():
         print("Going back to menu...")
         return
 
-    char, inv = create_character()
+    char, inv = create_character(None)
 
     diff_str, char["lives"] = set_difficulty()
 
@@ -181,86 +172,7 @@ def start_new_game():
     print("Difficulty:", diff_str)
     print("Number of lives:", char["lives"], "\n")
 
-    my_path = os.path.join('.', 'story', 'story.json')
-
-    with open(my_path) as story_file:
-        story = json.load(story_file)
-
-    level = 1
-    scene = 1
-
-    while True:
-
-        print_red_on_cyan = lambda x: cprint(x, "red", "on_cyan")
-
-        print_red_on_cyan(story['story'][f'lvl{level}']['title'] + "\n")
-
-        if level == 2:
-            break
-            # sys.exit()
-
-        print(story['story'][f'lvl{level}']['scenes'][f'scene{scene}'] + "\n")
-
-        user_input = prompt_user_input(story, level, scene)
-
-        ''''''
-
-        outcome_text, outcome_effects = \
-            process_user_input(user_input, char, inv, story, level, scene)
-
-        if outcome_text is not None:
-
-            outcome_text = re.sub("{tool}", char["tool"], outcome_text)
-
-            print_red_on_cyan(outcome_text)
-
-        if outcome_effects is not None:
-
-            for effect in outcome_effects:
-
-                item_to_add = re.search(r"inventory\+'(.+)'", effect)
-                if item_to_add is not None:
-                    item_to_add = item_to_add.group(1).capitalize()
-                    inv = add_to_inventory(inv, item_to_add)
-
-                item_to_remove = re.search(r"inventory-'(.+)'", effect)
-                if item_to_remove is not None:
-                    item_to_remove = item_to_remove.group(1).capitalize()
-                    inv = remove_from_inventory(inv, item_to_remove)
-
-                if effect == 'repeat':
-                    pass
-
-                lives_to_add = re.search(r"life\+(.+)", effect)
-                if lives_to_add is not None:
-                    lives_to_add = lives_to_add.group(1)
-                    char["lives"] += int(lives_to_add)
-                    print_red_on_cyan("You gained an extra life! Lives remaining: %s\n" % char["lives"])
-
-                lives_to_sub = re.search(r"life-(.+)", effect)
-                if lives_to_sub is not None:
-                    lives_to_sub = lives_to_sub.group(1)
-                    char["lives"] -= int(lives_to_sub)
-                    print_red_on_cyan("You died! Lives remaining: %s\n" % char["lives"])
-                    if char["lives"] == 0:
-                        print("You've run out of lives! Game over!")
-                        return
-
-                if effect == 'save':
-                    save_game(user_name, char, diff_str, level)
-
-                if effect == 'move':
-                    scene += 1
-                    if scene > 3:
-                        level += 1
-
-    if level == 2:
-        print_red_on_cyan("Goodbye!")
-        sys.exit()
-
-
-def load_saved_game():
-    print("No save data found!")
+    main_game_loop(char, user_name, diff_str, inv, 1, 1)
 
 
 def save_game(user_name, char, diff_str, level):
@@ -293,7 +205,149 @@ def save_game(user_name, char, diff_str, level):
         json.dump(my_data, f, indent=4)
 
 
-def main_loop():
+def create_character(saved_game):
+
+    if saved_game is None:
+
+        print("Create your character:")
+
+        char = {"name": input("1- Name \n").capitalize(), "species": input("2- Species \n").capitalize(),
+                "gender": input("3- Gender \n").capitalize()}
+
+        print("Pack your bag for the journey:")
+
+        inv = [None] * 3
+
+        inv[0] = char["snack"] = input("1- Favourite Snack \n").capitalize()
+        inv[1] = char["weapon"] = input("2- A weapon for the journey \n").capitalize()
+        inv[2] = char["tool"] = input("3- A traversal tool \n").capitalize()
+
+    else:
+
+        char = {"name": saved_game['char_attrs']['name'], 'species': saved_game['char_attrs']['species'], 'gender': saved_game['char_attrs']['gender']}
+
+        inv = [None] * 3
+
+        inv[0] = char["snack"] = saved_game['inventory']['snack']
+        inv[1] = char["weapon"] = saved_game['inventory']['weapon']
+        inv[2] = char["tool"] = saved_game['inventory']['tool']
+
+    return char, inv
+
+
+def load_saved_game():
+    # print("No save data found!")
+    users, save_files = list_save_files()
+    if save_files is None:
+        print("No save data found!")
+    else:
+        print(f'Saved games for these users: {users}')
+        user = input("Type your user name:\n")
+        if user not in users:
+            print("No save data found!")
+        else:
+            print(f"Loading game for user '{user}'")
+            with open(os.path.join('.', 'game/saves/', user + '.json'), 'r') as save_file:
+                saved_game = json.load(save_file)
+                # print("Saved char name:" + saved_game['char_attrs']['name'])
+                char, inv = create_character(saved_game)
+                char["lives"] = saved_game['lives']
+                main_game_loop(char, user, saved_game['difficulty'], inv, saved_game['level'], scene=1)
+
+
+def list_save_files():
+    # print(os.listdir())
+    all_files = os.listdir('./game/saves')
+    save_files = []
+    users = []
+    for f in all_files:
+        user = re.search(r"^(.+)\.json$", f)
+        if user is not None:
+            user = user.group(1)
+            users.append(user)
+            save_files.append(f)
+    return users, save_files
+
+
+def main_game_loop(char, user_name, diff_str, inv, level, scene):
+
+    my_path = os.path.join('.', 'story', 'story.json')
+
+    with open(my_path) as story_file:
+        story = json.load(story_file)
+
+    while True:
+
+        print_red_on_cyan = lambda x: cprint(x, "red", "on_cyan")
+
+        print_red_on_cyan(story['story'][f'lvl{level}']['title'] + "\n")
+
+        print(story['story'][f'lvl{level}']['scenes'][f'scene{scene}'] + "\n")
+
+        user_input = prompt_user_input(story, level, scene)
+
+        outcome_text, outcome_effects = \
+            process_user_input(user_input, char, inv, story, level, scene)
+
+        if outcome_text is not None:
+
+            outcome_text = re.sub("{tool}", char["tool"], outcome_text)
+
+            outcome_text = re.sub("{weapon}", char["weapon"], outcome_text)
+
+            print_red_on_cyan(outcome_text)
+
+        if outcome_effects is not None:
+
+            for effect in outcome_effects:
+
+                item_to_add = re.search(r"inventory\+'(.+)'", effect)
+                if item_to_add is not None:
+                    item_to_add = item_to_add.group(1).capitalize()
+                    inv = add_to_inventory(inv, item_to_add)
+
+                item_to_remove = re.search(r"inventory-'(.+)'", effect)
+                if item_to_remove is not None:
+                    item_to_remove = item_to_remove.group(1).capitalize()
+                    inv = remove_from_inventory(inv, item_to_remove)
+
+                if effect == 'repeat':
+                    pass
+
+                lives_to_add = re.search(r"life\+(.+)", effect)
+                if lives_to_add is not None:
+                    lives_to_add = lives_to_add.group(1)
+                    char["lives"] += int(lives_to_add)
+                    print_red_on_cyan("You gained an extra life! Lives remaining: %s\n" % char["lives"])
+
+                lives_to_sub = re.search(r"life-(.+)", effect)
+                if lives_to_sub is not None:
+                    lives_to_sub = lives_to_sub.group(1)
+                    char["lives"] -= int(lives_to_sub)
+                    print_red_on_cyan("You died! Lives remaining: %s\n" % char["lives"])
+                    if char["lives"] == 0:
+                        print_red_on_cyan("You've run out of lives! Game over!")
+                        return
+
+                if effect == 'save':
+                    save_game(user_name, char, diff_str, level)
+
+                if effect == 'move':
+                    scene += 1
+
+                    if scene > 3:
+                        level += 1
+                        scene = 1
+
+        if level == 2 and scene == 3:  # Move from Level 2, scene 2 --> End of game
+            break
+
+    if level == 2 and scene == 3:
+        print_red_on_cyan("Congratulations! You beat the game!")
+        sys.exit()
+
+
+def top_menu():
 
     while True:
         top_menu_choice = process_top_menu_input(get_top_menu_input())
@@ -310,4 +364,4 @@ def main_loop():
             start_new_game()
 
 
-main_loop()
+top_menu()

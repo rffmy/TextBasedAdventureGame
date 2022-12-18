@@ -1,0 +1,15 @@
+{
+    "char_attrs": {
+        "name": "1",
+        "species": "1",
+        "gender": "1"
+    },
+    "inventory": {
+        "snack": "1",
+        "weapon": "Sword",
+        "tool": "1"
+    },
+    "lives": 5,
+    "difficulty": "Easy",
+    "level": 2
+}

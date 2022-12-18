@@ -1011,6 +1011,22 @@ files:
 - name: test/__init__.py
   visible: false
   learner_created: false
+- name: game/saves/1.json
+  visible: true
+  learner_created: true
+- name: game/saves/rse.json
+  visible: true
+  learner_created: true
+- name: game/saves/rss.json
+  visible: true
+  learner_created: true
+- name: game/saves/CakeIsALie.json
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/12296#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Sun, 18 Dec 2022 21:38:11 UTC
 record: -1

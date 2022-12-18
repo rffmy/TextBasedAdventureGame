@@ -10,14 +10,17 @@
     },
     "lvl2": {
       "title": "Level 2",
-      "scenes": {}
+      "scenes": {
+        "scene1": "Scene 1: Are you suggesting coconuts migrate?",
+        "scene2": "Scene: May need a sword to fight the boss..."
+      }
     }
   },
   "outcomes": {
     "lvl1": {
       "scene1": {
         "outcome1": "You found a key. (inventory+'key' and move)\n",
-        "outcome2": "You go up the mountain, using the {tool}  (move)\n",
+        "outcome2": "You go up the mountain, using the {tool} (move)\n",
         "outcome3": "You admired the majestic view of the mountain! (repeat)\n"
       },
       "scene2": {
@@ -32,6 +35,20 @@
         "outcome1": "The voice says 'Too bad, I thought you were clever!' as it gets closer to you.\nYou see a shape like gorilla for a second and you can't even make a peep... (life-1)",
         "outcome2": "The darkness says 'Wrong!'. You try to run but it catches you from your legs and drags you to darkness... (life-1)\n",
         "outcome3": "The darkness says 'Correct! You may pass traveller.'\nYou saw a light coming from the inner cave and you follow it. (move and save),"
+      }
+    },
+    "lvl2": {
+      "scene1": {
+        "outcome1": "You looked and found a coconut (inventory +'coconut' and move)\n",
+        "outcome2": "You are stuck in the scene.... Can somebody give me a push, please? (repeat)\n",
+        "outcome3": "You throw away any swords or knives you had (inventory-'sword' and inventory-'knife' and move)"
+      },
+      "scene2": {
+        "outcome1": {
+          "option1": "You cut the coconut in pieces using your {weapon}! Turns it was the boss of the game! Tasted good, too! (move)",
+          "option2": "No sharp object like 'Sword' or 'Knife' in inventory, with which to defeat the boss of the game! The coconut eats you! (life-1)"
+        },
+        "outcome2": "You went on a hunger strike! You lost 1 life! (life-1)"
       }
     }
   },
@@ -51,6 +68,17 @@
         "choice1": "A hummingbird.\n",
         "choice2": "A mosquito.\n",
         "choice3": "A bumblebee.\n"
+      }
+    },
+    "lvl2": {
+      "scene1": {
+        "choice1": "Look in a swallow nest on the mountain, maybe you'll find the right object -- what could a swallow carry?!\n",
+        "choice2": "Lets not go to Mount Quaf! It's a silly place after all!\n",
+        "choice3": "Throw away your sharp weapon that you might need in the next scene, just to spite 'em!\n"
+      },
+      "scene2": {
+        "choice1": "Fight the coconut and eat it!\n",
+        "choice2": "Go on a hunger strike\n"
       }
     }
   }
